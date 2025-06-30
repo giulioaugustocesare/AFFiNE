@@ -113,6 +113,16 @@ export const NavigationPanelCollectionNode = ({
     (data: DropTargetDropEvent<AffineDNDData>) => {
       if (collection && data.treeInstruction?.type === 'make-child') {
         if (data.source.data.entity?.type === 'doc') {
+          if (
+            data.source.data.from?.at ===
+              'navigation-panel:collection:filtered-docs' &&
+            data.source.data.from.collectionId !== collection.id
+          ) {
+            collectionService.removeDocFromCollection(
+              data.source.data.from.collectionId,
+              data.source.data.entity.id
+            );
+          }
           handleAddDocToCollection(data.source.data.entity.id);
           track.$.navigationPanel.organize.createOrganizeItem({
             type: 'link',
@@ -127,7 +137,7 @@ export const NavigationPanelCollectionNode = ({
         onDrop?.(data);
       }
     },
-    [collection, onDrop, handleAddDocToCollection]
+    [collection, onDrop, handleAddDocToCollection, collectionService]
   );
 
   const handleDropEffectOnCollection =
@@ -135,6 +145,13 @@ export const NavigationPanelCollectionNode = ({
       data => {
         if (collection && data.treeInstruction?.type === 'make-child') {
           if (data.source.data.entity?.type === 'doc') {
+            if (
+              data.source.data.from?.at ===
+                'navigation-panel:collection:filtered-docs' &&
+              data.source.data.from.collectionId !== collection.id
+            ) {
+              return 'move';
+            }
             return 'link';
           }
         } else {
@@ -148,6 +165,16 @@ export const NavigationPanelCollectionNode = ({
   const handleDropOnPlaceholder = useCallback(
     (data: DropTargetDropEvent<AffineDNDData>) => {
       if (collection && data.source.data.entity?.type === 'doc') {
+        if (
+          data.source.data.from?.at ===
+            'navigation-panel:collection:filtered-docs' &&
+          data.source.data.from.collectionId !== collection.id
+        ) {
+          collectionService.removeDocFromCollection(
+            data.source.data.from.collectionId,
+            data.source.data.entity.id
+          );
+        }
         handleAddDocToCollection(data.source.data.entity.id);
         track.$.navigationPanel.organize.createOrganizeItem({
           type: 'collection',
@@ -155,7 +182,7 @@ export const NavigationPanelCollectionNode = ({
         });
       }
     },
-    [collection, handleAddDocToCollection]
+    [collection, handleAddDocToCollection, collectionService]
   );
 
   const handleOpenCollapsed = useCallback(() => {
